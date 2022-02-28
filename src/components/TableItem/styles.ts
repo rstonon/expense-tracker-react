@@ -25,7 +25,8 @@ export const IconArea = styled.div`
     justify-content: space-around;
     align-items: center;
     height: 30px;
-
+    cursor: pointer;
+    
     svg{
         cursor: pointer;
         transition: box-shadow ease-in-out 0.8s;

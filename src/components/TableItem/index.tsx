@@ -3,6 +3,8 @@ import { Item } from '../../types/Item';
 import { formatDate } from '../../helpers/dateFilter';
 import { categories } from '../../data/categories';
 
+import { FaEdit, FaTrash } from 'react-icons/fa';
+
 
 type Props = {
     item: Item;
@@ -39,14 +41,16 @@ export const TableItem = ({ item, handleEditItem ,handleDeleteItem }: Props) => 
                     <C.IconItem
                         data-tip="Editar"
                         data-for="tip-top"
-                        onClick={() => onEditItem(item)}
-                    >Editar
+                    >
+
                     </C.IconItem>
                     <C.IconItem
                         data-tip="Excluir"
                         data-for="tip-top"
-                        onClick={() => onDeleteItem(item)}
-                    >Excluir
+                    >
+                        <FaTrash
+                            onClick={() => onDeleteItem(item)}
+                        />
                     </C.IconItem>
                 </C.IconArea>
             </C.TableColumn>
