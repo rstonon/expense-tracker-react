@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import * as C from './App.styles';
 
 import { ThemeProvider } from "styled-components";
+import GlobalStyles from './styles/global';
 
 import { Item } from './types/Item';
 import { categories } from './data/categories';
@@ -17,17 +18,38 @@ import usePersistedState from "./utils/usePersistedState";
 import light from "./styles/themes/light";
 import dark from "./styles/themes/dark";
 
+import ActionArea from "./components/ActionArea";
+import ModalAddItem from "./components/ModalAddItem";
+
 
 const App = () => {
 
-  const [theme, setTheme] = usePersistedState('light', light);
+    const [showModal, setShowModal] = useState(false);
 
-  const [list, setList] = useState(items);
-  const [filteredList, setFilteredList] = useState<Item[]>([]);
+    const [theme, setTheme] = usePersistedState('light', light);
 
-  const [currentMonth, setCurrentMonth] = useState(getCurrentMonth());
-  const [income, setIncome] = useState(0);
-  const [expense, setExpense] = useState(0);
+    const [list, setList] = useState(items);
+    const [filteredList, setFilteredList] = useState<Item[]>([]);
+    const [search, setSearch] = useState('');
+
+    const [currentMonth, setCurrentMonth] = useState(getCurrentMonth());
+    const [income, setIncome] = useState(0);
+    const [expense, setExpense] = useState(0);
+
+
+    const handleEditItem = (item: Item) => {
+
+    }
+
+    const handleDeleteItem = (title: string) => {
+
+        let newlist: Item[] = list.filter((item: Item) => {
+            if (item.title != title)
+                return item;
+        });
+
+        setList(newlist);
+    }
 
   useEffect(()=>{
     setFilteredList( filterListByMonth(list, currentMonth) );
@@ -54,11 +76,25 @@ const App = () => {
       setCurrentMonth(newMonth);
   };
 
-  const handleAddItem = (item: Item) => {
-      let newList = [...list];
-      newList.push(item);
-      setList(newList);
-  };
+    const handleShowModal = () => {
+        setShowModal(!showModal);
+    }
+
+    const handleAddItem = (item: Item) => {
+
+        let newlist: Item[] = [...list];
+
+        newlist.push({
+            date: new Date(),
+            category: item.category,
+            title: item.title,
+            value: parseFloat(item.value.toFixed(2))
+        });
+
+        setList(newlist);
+
+        handleShowModal();
+    }
 
     const toggleTheme = () => {
         if (theme.title !== 'Dark') {
@@ -67,6 +103,39 @@ const App = () => {
             setTheme(light);
         }
     };
+
+    const handleFilterByCategory = (category: string) => {
+        console.log("Categoria enviada: " + category);
+        if (category != "all") {
+
+            setFilteredList(filterListByMonth(list, currentMonth));
+
+            let newList = filteredList.filter((item: Item) => {
+                if (item.category == category)
+                    return item;
+            });
+
+            setFilteredList(newList);
+
+        } else {
+            setFilteredList(filterListByMonth(list, currentMonth));
+        }
+
+    }
+
+    const handleFilterByTitle = () => {
+
+        if (search != '') {
+            let newList = filteredList.filter((item: Item) => {
+                if (item.title.toLowerCase().indexOf(search.toLowerCase()) >= 0)
+                    return item;
+            });
+
+            setFilteredList(newList);
+        } else {
+            setFilteredList(filterListByMonth(list, currentMonth));
+        }
+    }
 
   return (
 
@@ -89,15 +158,32 @@ const App = () => {
             expense={expense}
         />
 
+          {/*<ActionArea*/}
+          {/*    onShowModal={handleShowModal}*/}
+          {/*    onSetCategory={handleFilterByCategory}*/}
+          {/*    onSearchText={setSearch}*/}
+          {/*/>*/}
+
         {/* Área de Inserir */}
         <InputArea onAdd={handleAddItem} />
 
         {/* Tabela de Itens */}
-        <TableArea list={filteredList} />
+        <TableArea
+            list={filteredList}
+            onEditItem={handleEditItem}
+            onDeleteItem={handleDeleteItem}
+        />
 
       </C.Body>
         <ReactTooltip id="tip-top" place="top" effect="solid" />
     </C.Container>
+      {showModal &&
+      <ModalAddItem
+          onShowModal={handleShowModal}
+          onAddItem={handleAddItem}
+      />
+      }
+      <GlobalStyles />
   </ThemeProvider>
   );
 };
